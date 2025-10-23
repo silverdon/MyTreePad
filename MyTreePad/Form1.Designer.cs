@@ -35,9 +35,14 @@
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.treeFontToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contentFontToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer = new System.Windows.Forms.SplitContainer();
             this.treeViewNotes = new System.Windows.Forms.TreeView();
             this.treeContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.copyNodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pasteNodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addChildNodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addSiblingNodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -54,7 +59,8 @@
             // menuStrip
             // 
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem});
+            this.fileToolStripMenuItem,
+            this.viewToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(800, 24);
@@ -100,6 +106,29 @@
             this.saveAsToolStripMenuItem.Text = "Save &As...";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.Menu_SaveAs_Click);
             // 
+            // viewToolStripMenuItem
+            // 
+            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.treeFontToolStripMenuItem,
+            this.contentFontToolStripMenuItem});
+            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+            this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.viewToolStripMenuItem.Text = "&View";
+            // 
+            // treeFontToolStripMenuItem
+            // 
+            this.treeFontToolStripMenuItem.Name = "treeFontToolStripMenuItem";
+            this.treeFontToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.treeFontToolStripMenuItem.Text = "Tree &Font...";
+            this.treeFontToolStripMenuItem.Click += new System.EventHandler(this.Menu_View_TreeFont_Click);
+            // 
+            // contentFontToolStripMenuItem
+            // 
+            this.contentFontToolStripMenuItem.Name = "contentFontToolStripMenuItem";
+            this.contentFontToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.contentFontToolStripMenuItem.Text = "&Content Font...";
+            this.contentFontToolStripMenuItem.Click += new System.EventHandler(this.Menu_View_ContentFont_Click);
+            // 
             // splitContainer
             // 
             this.splitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -127,16 +156,34 @@
             this.treeViewNotes.Size = new System.Drawing.Size(266, 426);
             this.treeViewNotes.TabIndex = 0;
             this.treeViewNotes.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.TreeViewNotes_AfterSelect);
+            this.treeViewNotes.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.TreeViewNotes_NodeMouseClick);
             // 
             // treeContextMenu
             // 
             this.treeContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copyNodeToolStripMenuItem,
+            this.pasteNodeToolStripMenuItem,
             this.addChildNodeToolStripMenuItem,
             this.addSiblingNodeToolStripMenuItem,
             this.toolStripSeparator1,
             this.deleteNodeToolStripMenuItem});
             this.treeContextMenu.Name = "treeContextMenu";
-            this.treeContextMenu.Size = new System.Drawing.Size(168, 76);
+            this.treeContextMenu.Size = new System.Drawing.Size(168, 120);
+            this.treeContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.TreeContextMenu_Opening);
+            // 
+            // copyNodeToolStripMenuItem
+            // 
+            this.copyNodeToolStripMenuItem.Name = "copyNodeToolStripMenuItem";
+            this.copyNodeToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.copyNodeToolStripMenuItem.Text = "Copy Node";
+            this.copyNodeToolStripMenuItem.Click += new System.EventHandler(this.Context_Copy_Click);
+            // 
+            // pasteNodeToolStripMenuItem
+            // 
+            this.pasteNodeToolStripMenuItem.Name = "pasteNodeToolStripMenuItem";
+            this.pasteNodeToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.pasteNodeToolStripMenuItem.Text = "Paste Node";
+            this.pasteNodeToolStripMenuItem.Click += new System.EventHandler(this.Context_Paste_Click);
             // 
             // addChildNodeToolStripMenuItem
             // 
@@ -208,10 +255,15 @@
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem treeFontToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem contentFontToolStripMenuItem;
         private System.Windows.Forms.SplitContainer splitContainer;
         private System.Windows.Forms.TreeView treeViewNotes;
         private System.Windows.Forms.TextBox textBoxContent;
         private System.Windows.Forms.ContextMenuStrip treeContextMenu;
+        private System.Windows.Forms.ToolStripMenuItem copyNodeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pasteNodeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem addChildNodeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem addSiblingNodeToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;

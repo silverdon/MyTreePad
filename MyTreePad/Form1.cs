@@ -17,6 +17,16 @@ namespace MyTreePad
         private const string HJT_NODE_END = "<end node> 5P9i0s8y19Z";
         private const string HJT_NODE_TYPE = "dt=Text";
 
+        // Fonts for UI (added to allow changing sizes)
+        private Font treeFont;
+        private Font contentFont;
+
+        // In-memory clipboard for a node subtree (not persisted to system clipboard)
+        private TreeNode clipboardNode;
+
+        // Track whether there are unsaved changes
+        private bool isDirty = false;
+
         public Form1()
         {
             // This method is defined in Form1.Designer.cs
@@ -24,6 +34,14 @@ namespace MyTreePad
             
             // Set up our new document
             InitializeNewDocument();
+
+            // Initialize font fields with current control fonts
+            treeFont = treeViewNotes.Font;
+            contentFont = textBoxContent.Font;
+
+            // Wire up events not already wired in designer
+            treeViewNotes.AfterLabelEdit += TreeViewNotes_AfterLabelEdit;
+            this.FormClosing += Form1_FormClosing;
         }
 
         /// <summary>
@@ -38,8 +56,51 @@ namespace MyTreePad
             treeViewNotes.Nodes.Add(rootNode);
             treeViewNotes.SelectedNode = rootNode;
             currentFilePath = null;
-            this.Text = "MyTreePad - New Document";
+            SetDirty(false);
+            RefreshTitle();
         }
+
+        #region Dirty / Title helpers
+
+        private void SetDirty(bool value)
+        {
+            isDirty = value;
+            RefreshTitle();
+        }
+
+        private void RefreshTitle()
+        {
+            string fileName = string.IsNullOrEmpty(currentFilePath) ? "New Document" : Path.GetFileName(currentFilePath);
+            this.Text = $"MyTreePad - {fileName}" + (isDirty ? " *" : "");
+        }
+
+        /// <summary>
+        /// If there are unsaved changes prompt the user to save. Returns true to continue the pending action.
+        /// </summary>
+        private bool PromptSaveIfDirty()
+        {
+            if (!isDirty) return true;
+
+            var result = MessageBox.Show("The current document has unsaved changes. Do you want to save them?", 
+                "Save Changes?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+
+            if (result == DialogResult.Yes)
+            {
+                Menu_Save_Click(this, EventArgs.Empty);
+                // If the save did not clear dirty (user cancelled Save As), abort
+                return !isDirty;
+            }
+            else if (result == DialogResult.No)
+            {
+                return true;
+            }
+            else // Cancel
+            {
+                return false;
+            }
+        }
+
+        #endregion
 
         #region Event Handlers (Linking UI together)
 
@@ -52,6 +113,7 @@ namespace MyTreePad
             if (treeViewNotes.SelectedNode != null)
             {
                 treeViewNotes.SelectedNode.Tag = textBoxContent.Text;
+                SetDirty(true);
             }
         }
 
@@ -71,18 +133,38 @@ namespace MyTreePad
             }
         }
 
+        // Ensure right-click selects the node before showing context menu
+        private void TreeViewNotes_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            if (e.Node != null)
+            {
+                treeViewNotes.SelectedNode = e.Node;
+            }
+        }
+
+        // Mark dirty after label edit
+        private void TreeViewNotes_AfterLabelEdit(object sender, NodeLabelEditEventArgs e)
+        {
+            if (e.Label != null)
+            {
+                SetDirty(true);
+            }
+        }
+
         #endregion
 
         #region Menu Bar Logic (File > New, Open, Save)
 
         private void Menu_New_Click(object sender, EventArgs e)
         {
-            // TODO: Ask to save changes first
+            if (!PromptSaveIfDirty()) return;
             InitializeNewDocument();
         }
 
         private void Menu_Open_Click(object sender, EventArgs e)
         {
+            if (!PromptSaveIfDirty()) return;
+
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
                 ofd.Filter = "HJT Files (*.hjt)|*.hjt|All Files (*.*)|*.*";
@@ -92,7 +174,8 @@ namespace MyTreePad
                     {
                         LoadFromFile(ofd.FileName);
                         currentFilePath = ofd.FileName;
-                        this.Text = $"MyTreePad - {Path.GetFileName(currentFilePath)}";
+                        SetDirty(false);
+                        RefreshTitle();
                     }
                     catch (Exception ex)
                     {
@@ -113,7 +196,8 @@ namespace MyTreePad
                 try
                 {
                     SaveToFile(currentFilePath);
-                    this.Text = $"MyTreePad - {Path.GetFileName(currentFilePath)}";
+                    SetDirty(false);
+                    RefreshTitle();
                 }
                 catch (Exception ex)
                 {
@@ -133,13 +217,74 @@ namespace MyTreePad
                     {
                         SaveToFile(sfd.FileName);
                         currentFilePath = sfd.FileName;
-                        this.Text = $"MyTreePad - {Path.GetFileName(currentFilePath)}";
+                        SetDirty(false);
+                        RefreshTitle();
                     }
                     catch (Exception ex)
                     {
                         MessageBox.Show($"Error saving file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
+            }
+        }
+
+        // Intercept form closing to prompt to save if needed
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (!PromptSaveIfDirty())
+            {
+                e.Cancel = true;
+            }
+        }
+
+        #endregion
+
+        #region View -> Font Change Handlers (added)
+
+        private void Menu_View_TreeFont_Click(object sender, EventArgs e)
+        {
+            using (FontDialog fd = new FontDialog())
+            {
+                fd.Font = treeFont;
+                fd.ShowColor = false;
+                if (fd.ShowDialog() == DialogResult.OK)
+                {
+                    treeFont = fd.Font;
+                    ApplyTreeFont();
+                }
+            }
+        }
+
+        private void Menu_View_ContentFont_Click(object sender, EventArgs e)
+        {
+            using (FontDialog fd = new FontDialog())
+            {
+                fd.Font = contentFont;
+                fd.ShowColor = false;
+                if (fd.ShowDialog() == DialogResult.OK)
+                {
+                    contentFont = fd.Font;
+                    ApplyContentFont();
+                }
+            }
+        }
+
+        private void ApplyTreeFont()
+        {
+            if (treeViewNotes != null && treeFont != null)
+            {
+                treeViewNotes.Font = treeFont;
+                // TreeView may need a layout refresh when font changes
+                treeViewNotes.Refresh();
+            }
+        }
+
+        private void ApplyContentFont()
+        {
+            if (textBoxContent != null && contentFont != null)
+            {
+                textBoxContent.Font = contentFont;
+                textBoxContent.Refresh();
             }
         }
 
@@ -162,6 +307,7 @@ namespace MyTreePad
             selectedNode.Expand();
             treeViewNotes.SelectedNode = newNode;
             newNode.BeginEdit(); // Allow user to rename
+            SetDirty(true);
         }
 
         private void Context_AddSibling_Click(object sender, EventArgs e)
@@ -181,6 +327,7 @@ namespace MyTreePad
             collection.Insert(selectedNode.Index + 1, newNode);
             treeViewNotes.SelectedNode = newNode;
             newNode.BeginEdit();
+            SetDirty(true);
         }
 
         private void Context_DeleteNode_Click(object sender, EventArgs e)
@@ -193,8 +340,51 @@ namespace MyTreePad
                 {
                     selectedNode.Remove();
                     textBoxContent.Clear();
+                    SetDirty(true);
                 }
             }
+        }
+
+        // Copy selected node (including subtree) into in-memory clipboard
+        private void Context_Copy_Click(object sender, EventArgs e)
+        {
+            TreeNode sel = treeViewNotes.SelectedNode;
+            if (sel != null)
+            {
+                clipboardNode = (TreeNode)sel.Clone();
+            }
+        }
+
+        // Paste clipboard subtree as child of selected node (or as root if no selection)
+        private void Context_Paste_Click(object sender, EventArgs e)
+        {
+            if (clipboardNode == null) return;
+
+            TreeNode target = treeViewNotes.SelectedNode;
+            TreeNode toInsert = (TreeNode)clipboardNode.Clone();
+
+            if (target == null)
+            {
+                // Paste as new root node
+                treeViewNotes.Nodes.Add(toInsert);
+                treeViewNotes.SelectedNode = toInsert;
+            }
+            else
+            {
+                // Paste as child of the selected node
+                target.Nodes.Add(toInsert);
+                target.Expand();
+                treeViewNotes.SelectedNode = toInsert;
+            }
+
+            SetDirty(true);
+        }
+
+        // Enable/disable context menu items based on state
+        private void TreeContextMenu_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            copyNodeToolStripMenuItem.Enabled = treeViewNotes.SelectedNode != null;
+            pasteNodeToolStripMenuItem.Enabled = clipboardNode != null;
         }
 
         #endregion
@@ -214,6 +404,9 @@ namespace MyTreePad
                     RecursiveSaveNode(node, writer);
                 }
             }
+
+            // After successful write mark as saved
+            SetDirty(false);
         }
 
         /// <summary>
@@ -283,6 +476,8 @@ namespace MyTreePad
             {
                 treeViewNotes.SelectedNode = treeViewNotes.Nodes[0];
             }
+
+            SetDirty(false);
         }
 
         /// <summary>
