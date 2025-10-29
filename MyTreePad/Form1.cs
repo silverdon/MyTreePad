@@ -27,6 +27,11 @@ namespace MyTreePad
         // Track whether there are unsaved changes
         private bool isDirty = false;
 
+        // Active editing node visual indicator
+        private TreeNode activeEditingNode;
+        private Color activeNodePrevBackColor;
+        private Color activeNodePrevForeColor;
+
         public Form1()
         {
             // This method is defined in Form1.Designer.cs
@@ -42,6 +47,10 @@ namespace MyTreePad
             // Wire up events not already wired in designer
             treeViewNotes.AfterLabelEdit += TreeViewNotes_AfterLabelEdit;
             this.FormClosing += Form1_FormClosing;
+
+            // Wire focus events to mark active editing node
+            textBoxContent.Enter += TextBoxContent_Enter;
+            textBoxContent.Leave += TextBoxContent_Leave;
         }
 
         /// <summary>
@@ -49,6 +58,9 @@ namespace MyTreePad
         /// </summary>
         private void InitializeNewDocument()
         {
+            // Clear any active indicator first
+            ClearActiveEditingNode();
+
             treeViewNotes.Nodes.Clear();
             textBoxContent.Clear();
             TreeNode rootNode = new TreeNode("My Document");
@@ -131,6 +143,16 @@ namespace MyTreePad
             {
                 textBoxContent.Text = string.Empty;
             }
+
+            // Update active editing marker if text box is focused
+            if (textBoxContent.Focused)
+            {
+                SetActiveEditingNode(e.Node);
+            }
+            else
+            {
+                ClearActiveEditingNode();
+            }
         }
 
         // Ensure right-click selects the node before showing context menu
@@ -148,6 +170,53 @@ namespace MyTreePad
             if (e.Label != null)
             {
                 SetDirty(true);
+            }
+        }
+
+        // When the user focuses the text area, highlight the selected node as active
+        private void TextBoxContent_Enter(object sender, EventArgs e)
+        {
+            SetActiveEditingNode(treeViewNotes.SelectedNode);
+        }
+
+        // When the user leaves the text area, clear the active highlight
+        private void TextBoxContent_Leave(object sender, EventArgs e)
+        {
+            ClearActiveEditingNode();
+        }
+
+        #endregion
+
+        #region Active editing marker helpers
+
+        private void SetActiveEditingNode(TreeNode node)
+        {
+            if (activeEditingNode == node) return;
+
+            // Restore previous first
+            ClearActiveEditingNode();
+
+            if (node == null) return;
+
+            // Save previous colors (may be Color.Empty)
+            activeNodePrevBackColor = node.BackColor;
+            activeNodePrevForeColor = node.ForeColor;
+
+            // Apply highlight (visible while tree is not focused)
+            node.BackColor = Color.LightYellow;
+            node.ForeColor = Color.Black;
+
+            activeEditingNode = node;
+        }
+
+        private void ClearActiveEditingNode()
+        {
+            if (activeEditingNode != null)
+            {
+                // Restore previous colors (may be Color.Empty so it inherits)
+                activeEditingNode.BackColor = activeNodePrevBackColor;
+                activeEditingNode.ForeColor = activeNodePrevForeColor;
+                activeEditingNode = null;
             }
         }
 
@@ -525,6 +594,9 @@ namespace MyTreePad
         /// </summary>
         private void LoadFromFile(string filePath)
         {
+            // Clear any active indicator first
+            ClearActiveEditingNode();
+
             treeViewNotes.Nodes.Clear();
             textBoxContent.Clear();
 
