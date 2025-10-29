@@ -43,6 +43,10 @@
             this.treeContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.copyNodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pasteNodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.expandNodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.collapseNodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.expandAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.collapseAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addChildNodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addSiblingNodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -163,51 +167,83 @@
             this.treeContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.copyNodeToolStripMenuItem,
             this.pasteNodeToolStripMenuItem,
+            this.expandNodeToolStripMenuItem,
+            this.collapseNodeToolStripMenuItem,
+            this.expandAllToolStripMenuItem,
+            this.collapseAllToolStripMenuItem,
             this.addChildNodeToolStripMenuItem,
             this.addSiblingNodeToolStripMenuItem,
             this.toolStripSeparator1,
             this.deleteNodeToolStripMenuItem});
             this.treeContextMenu.Name = "treeContextMenu";
-            this.treeContextMenu.Size = new System.Drawing.Size(168, 120);
+            this.treeContextMenu.Size = new System.Drawing.Size(200, 220);
             this.treeContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.TreeContextMenu_Opening);
             // 
             // copyNodeToolStripMenuItem
             // 
             this.copyNodeToolStripMenuItem.Name = "copyNodeToolStripMenuItem";
-            this.copyNodeToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.copyNodeToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.copyNodeToolStripMenuItem.Text = "Copy Node";
             this.copyNodeToolStripMenuItem.Click += new System.EventHandler(this.Context_Copy_Click);
             // 
             // pasteNodeToolStripMenuItem
             // 
             this.pasteNodeToolStripMenuItem.Name = "pasteNodeToolStripMenuItem";
-            this.pasteNodeToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.pasteNodeToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.pasteNodeToolStripMenuItem.Text = "Paste Node";
             this.pasteNodeToolStripMenuItem.Click += new System.EventHandler(this.Context_Paste_Click);
+            // 
+            // expandNodeToolStripMenuItem
+            // 
+            this.expandNodeToolStripMenuItem.Name = "expandNodeToolStripMenuItem";
+            this.expandNodeToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
+            this.expandNodeToolStripMenuItem.Text = "Expand Node";
+            this.expandNodeToolStripMenuItem.Click += new System.EventHandler(this.Context_Expand_Click);
+            // 
+            // collapseNodeToolStripMenuItem
+            // 
+            this.collapseNodeToolStripMenuItem.Name = "collapseNodeToolStripMenuItem";
+            this.collapseNodeToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
+            this.collapseNodeToolStripMenuItem.Text = "Collapse Node";
+            this.collapseNodeToolStripMenuItem.Click += new System.EventHandler(this.Context_Collapse_Click);
+            // 
+            // expandAllToolStripMenuItem
+            // 
+            this.expandAllToolStripMenuItem.Name = "expandAllToolStripMenuItem";
+            this.expandAllToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
+            this.expandAllToolStripMenuItem.Text = "Expand All";
+            this.expandAllToolStripMenuItem.Click += new System.EventHandler(this.Context_ExpandAll_Click);
+            // 
+            // collapseAllToolStripMenuItem
+            // 
+            this.collapseAllToolStripMenuItem.Name = "collapseAllToolStripMenuItem";
+            this.collapseAllToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
+            this.collapseAllToolStripMenuItem.Text = "Collapse All";
+            this.collapseAllToolStripMenuItem.Click += new System.EventHandler(this.Context_CollapseAll_Click);
             // 
             // addChildNodeToolStripMenuItem
             // 
             this.addChildNodeToolStripMenuItem.Name = "addChildNodeToolStripMenuItem";
-            this.addChildNodeToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.addChildNodeToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.addChildNodeToolStripMenuItem.Text = "Add Child Node";
             this.addChildNodeToolStripMenuItem.Click += new System.EventHandler(this.Context_AddChild_Click);
             // 
             // addSiblingNodeToolStripMenuItem
             // 
             this.addSiblingNodeToolStripMenuItem.Name = "addSiblingNodeToolStripMenuItem";
-            this.addSiblingNodeToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.addSiblingNodeToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.addSiblingNodeToolStripMenuItem.Text = "Add Sibling Node";
             this.addSiblingNodeToolStripMenuItem.Click += new System.EventHandler(this.Context_AddSibling_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(164, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(196, 6);
             // 
             // deleteNodeToolStripMenuItem
             // 
             this.deleteNodeToolStripMenuItem.Name = "deleteNodeToolStripMenuItem";
-            this.deleteNodeToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.deleteNodeToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.deleteNodeToolStripMenuItem.Text = "Delete Node";
             this.deleteNodeToolStripMenuItem.Click += new System.EventHandler(this.Context_DeleteNode_Click);
             // 
@@ -264,6 +300,10 @@
         private System.Windows.Forms.ContextMenuStrip treeContextMenu;
         private System.Windows.Forms.ToolStripMenuItem copyNodeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pasteNodeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem expandNodeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem collapseNodeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem expandAllToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem collapseAllToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem addChildNodeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem addSiblingNodeToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;

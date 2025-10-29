@@ -30,8 +30,8 @@ namespace MyTreePad
         public Form1()
         {
             // This method is defined in Form1.Designer.cs
-            InitializeComponent(); 
-            
+            InitializeComponent();
+
             // Set up our new document
             InitializeNewDocument();
 
@@ -81,7 +81,7 @@ namespace MyTreePad
         {
             if (!isDirty) return true;
 
-            var result = MessageBox.Show("The current document has unsaved changes. Do you want to save them?", 
+            var result = MessageBox.Show("The current document has unsaved changes. Do you want to save them?",
                 "Save Changes?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
 
             if (result == DialogResult.Yes)
@@ -290,7 +290,7 @@ namespace MyTreePad
 
         #endregion
 
-        #region Context Menu Logic (Right-click)
+        #region Context Menu Logic (Right-click) - expanded with expand/collapse
 
         private void Context_AddChild_Click(object sender, EventArgs e)
         {
@@ -380,11 +380,89 @@ namespace MyTreePad
             SetDirty(true);
         }
 
+        // Expand selected node (single-level)
+        private void Context_Expand_Click(object sender, EventArgs e)
+        {
+            var sel = treeViewNotes.SelectedNode;
+            if (sel != null)
+            {
+                sel.Expand();
+            }
+        }
+
+        // Collapse selected node (single-level)
+        private void Context_Collapse_Click(object sender, EventArgs e)
+        {
+            var sel = treeViewNotes.SelectedNode;
+            if (sel != null)
+            {
+                sel.Collapse();
+            }
+        }
+
+        // Expand all children of selected node or whole tree if no selection
+        private void Context_ExpandAll_Click(object sender, EventArgs e)
+        {
+            var sel = treeViewNotes.SelectedNode;
+            if (sel != null)
+            {
+                sel.ExpandAll();
+                sel.EnsureVisible();
+            }
+            else
+            {
+                treeViewNotes.ExpandAll();
+            }
+        }
+
+        // Collapse all children of selected node or whole tree if no selection
+        private void Context_CollapseAll_Click(object sender, EventArgs e)
+        {
+            var sel = treeViewNotes.SelectedNode;
+            if (sel != null)
+            {
+                CollapseRecursive(sel);
+            }
+            else
+            {
+                foreach (TreeNode n in treeViewNotes.Nodes)
+                {
+                    CollapseRecursive(n);
+                }
+            }
+        }
+
+        private void CollapseRecursive(TreeNode node)
+        {
+            foreach (TreeNode child in node.Nodes)
+            {
+                CollapseRecursive(child);
+            }
+            node.Collapse();
+        }
+
         // Enable/disable context menu items based on state
         private void TreeContextMenu_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            copyNodeToolStripMenuItem.Enabled = treeViewNotes.SelectedNode != null;
+            bool hasSelection = treeViewNotes.SelectedNode != null;
+            copyNodeToolStripMenuItem.Enabled = hasSelection;
             pasteNodeToolStripMenuItem.Enabled = clipboardNode != null;
+
+            expandNodeToolStripMenuItem.Enabled = hasSelection && !treeViewNotes.SelectedNode.IsExpanded;
+            collapseNodeToolStripMenuItem.Enabled = hasSelection && treeViewNotes.SelectedNode.IsExpanded;
+
+            expandAllToolStripMenuItem.Enabled = treeViewNotes.Nodes.Count > 0;
+            collapseAllToolStripMenuItem.Enabled = AnyNodeExpanded(treeViewNotes.Nodes);
+        }
+
+        private bool AnyNodeExpanded(TreeNodeCollection nodes)
+        {
+            foreach (TreeNode n in nodes)
+            {
+                if (n.IsExpanded) return true;
+                if (AnyNodeExpanded(n.Nodes)) return true;
+            }
+            return false;
         }
 
         #endregion
@@ -398,7 +476,7 @@ namespace MyTreePad
         {
             using (StreamWriter writer = new StreamWriter(filePath, false, Encoding.Default))
             {
-                writer.WriteLine(HJT_HEADER); 
+                writer.WriteLine(HJT_HEADER);
                 foreach (TreeNode node in treeViewNotes.Nodes)
                 {
                     RecursiveSaveNode(node, writer);
@@ -432,7 +510,7 @@ namespace MyTreePad
                     writer.WriteLine();
                 }
             }
-            
+
             writer.WriteLine(HJT_NODE_END);
 
             // Recurse for all children
@@ -488,8 +566,8 @@ namespace MyTreePad
             string nodeTag = reader.ReadLine(); // Should be "<node>"
             if (nodeTag != "<node>") return;
 
-            string title = reader.ReadLine(); 
-            int level = int.Parse(reader.ReadLine()); 
+            string title = reader.ReadLine();
+            int level = int.Parse(reader.ReadLine());
 
             StringBuilder content = new StringBuilder();
             string line;
