@@ -45,6 +45,13 @@ namespace MyTreePad
             // This method is defined in Form1.Designer.cs
             InitializeComponent();
 
+            // Allow the content textbox to accept very large text (0 = no enforced limit)
+            // and enable helpful editing/scrolling behavior.
+            textBoxContent.MaxLength = 0;
+            textBoxContent.Multiline = true;
+            textBoxContent.ScrollBars = ScrollBars.Both;
+            textBoxContent.WordWrap = true; // or false if you prefer horizontal scrolling
+
             // Set up our new document
             InitializeNewDocument();
 
